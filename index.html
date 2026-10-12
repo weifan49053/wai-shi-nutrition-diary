@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#183c34">
+  <meta name="description" content="記錄外食份量，追蹤每日熱量與三大營養素。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="營養日記">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>外食營養日記</title>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">EAT WELL · LIVE LIGHT</p>
+      <h1>外食營養日記</h1>
+    </div>
+    <button class="icon-button" id="installHelp" type="button" aria-label="安裝說明">⌂</button>
+  </header>
+
+  <main>
+    <section class="date-row" aria-label="日期選擇">
+      <button id="previousDay" class="date-arrow" type="button" aria-label="前一天">‹</button>
+      <label>
+        <span id="dateLabel">今天</span>
+        <input id="selectedDate" type="date">
+      </label>
+      <button id="nextDay" class="date-arrow" type="button" aria-label="後一天">›</button>
+    </section>
+
+    <section class="summary-card" aria-labelledby="summaryTitle">
+      <div class="summary-heading">
+        <div>
+          <p class="kicker">今日進度</p>
+          <h2 id="summaryTitle"><span id="calorieValue">0</span><small> / 2,100 kcal</small></h2>
+        </div>
+        <div class="calorie-ring" id="calorieRing" aria-hidden="true"><span id="ringPercent">0%</span></div>
+      </div>
+      <div class="macro-grid">
+        <div class="macro protein"><div><span>蛋白質</span><b><span id="proteinValue">0</span> / 140g</b></div><progress id="proteinProgress" max="140" value="0"></progress></div>
+        <div class="macro fat"><div><span>脂肪</span><b><span id="fatValue">0</span> / 70g</b></div><progress id="fatProgress" max="70" value="0"></progress></div>
+        <div class="macro carbs"><div><span>碳水</span><b><span id="carbsValue">0</span> / 228g</b></div><progress id="carbsProgress" max="228" value="0"></progress></div>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="主要功能">
+      <button class="tab active" data-view="diary" type="button">今日紀錄</button>
+      <button class="tab" data-view="foods" type="button">常吃外食</button>
+      <button class="tab" data-view="history" type="button">歷史</button>
+      <button class="tab" data-view="data" type="button">資料</button>
+    </nav>
+
+    <section id="diaryView" class="view active">
+      <div class="section-title"><div><p class="kicker">Meal log</p><h2>飲食紀錄</h2></div><button id="openAddFood" class="primary small" type="button">＋ 新增</button></div>
+      <div id="entryList" class="entry-list"></div>
+    </section>
+
+    <section id="foodsView" class="view">
+      <div class="section-title"><div><p class="kicker">Food library</p><h2>常吃外食資料庫</h2></div><button id="openCustomFood" class="secondary small" type="button">自訂食物</button></div>
+      <label class="search-field"><span>⌕</span><input id="foodSearch" type="search" placeholder="搜尋雞胸、便當、豆漿…" autocomplete="off"></label>
+      <div id="categoryFilters" class="filter-row"></div>
+      <div id="foodList" class="food-list"></div>
+    </section>
+
+    <section id="historyView" class="view">
+      <div class="section-title"><div><p class="kicker">History</p><h2>歷史查詢</h2></div></div>
+      <p class="muted">點選日期即可查看或修改當天紀錄。</p>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+    <section id="dataView" class="view">
+      <div class="section-title"><div><p class="kicker">Your data</p><h2>備份與匯出</h2></div></div>
+      <div class="data-card">
+        <h3>JSON 完整備份</h3>
+        <p>包含所有飲食紀錄與自訂食物，可在另一台裝置還原。</p>
+        <div class="button-row"><button id="backupJson" class="primary" type="button">下載備份</button><button id="restoreJson" class="secondary" type="button">選擇檔案還原</button></div>
+        <input id="restoreFile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <div class="data-card">
+        <h3>CSV 試算表</h3>
+        <p>匯出全部明細，可用 Excel、Numbers 或 Google 試算表開啟。</p>
+        <button id="exportCsv" class="secondary" type="button">匯出 CSV</button>
+      </div>
+      <div class="data-card install-card">
+        <h3>安裝到 iPhone</h3>
+        <ol><li>以 Safari 開啟部署網址。</li><li>點底部「分享」按鈕。</li><li>選擇「加入主畫面」，再點「新增」。</li></ol>
+        <p class="muted">安裝後可全螢幕開啟；曾載入過的頁面可離線使用。</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="foodDialog">
+    <form method="dialog" id="foodForm">
+      <button class="dialog-close" value="cancel" aria-label="關閉" type="submit">×</button>
+      <p class="kicker">Add meal</p>
+      <h2 id="foodDialogTitle">新增飲食</h2>
+      <label>食物<select id="foodSelect" required></select></label>
+      <div id="foodNutritionPreview" class="nutrition-preview"></div>
+      <label>份量倍數<div class="stepper"><button id="decreaseQuantity" type="button">−</button><input id="quantity" type="number" min="0.25" max="20" step="0.25" value="1" inputmode="decimal" required><button id="increaseQuantity" type="button">＋</button></div></label>
+      <label>餐別<select id="meal"><option>早餐</option><option>午餐</option><option>晚餐</option><option>點心</option></select></label>
+      <button class="primary full" value="default" type="submit">加入這一天</button>
+    </form>
+  </dialog>
+
+  <dialog id="customDialog">
+    <form method="dialog" id="customForm">
+      <button class="dialog-close" value="cancel" aria-label="關閉" type="submit">×</button>
+      <p class="kicker">Custom food</p><h2>新增自訂食物</h2>
+      <label>名稱<input id="customName" required maxlength="40"></label>
+      <label>一份是<input id="customServing" required maxlength="20" placeholder="例如：1 份、200 g"></label>
+      <div class="input-grid">
+        <label>熱量 kcal<input id="customCalories" type="number" min="0" step="0.1" required inputmode="decimal"></label>
+        <label>蛋白質 g<input id="customProtein" type="number" min="0" step="0.1" required inputmode="decimal"></label>
+        <label>脂肪 g<input id="customFat" type="number" min="0" step="0.1" required inputmode="decimal"></label>
+        <label>碳水 g<input id="customCarbs" type="number" min="0" step="0.1" required inputmode="decimal"></label>
+      </div>
+      <button class="primary full" value="default" type="submit">儲存至資料庫</button>
+    </form>
+  </dialog>
+
+  <dialog id="installDialog">
+    <form method="dialog"><button class="dialog-close" value="cancel" aria-label="關閉">×</button><p class="kicker">iPhone PWA</p><h2>加入主畫面</h2><p>請用 Safari 開啟網站，點工具列的分享圖示，再選「加入主畫面」。</p><button class="primary full" value="default">知道了</button></form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
